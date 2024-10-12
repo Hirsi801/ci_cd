@@ -1,40 +1,31 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
-
-# # Controls when the workflow will run
-# on:
-#   # Triggers the workflow on push or pull request events but only for the "main" branch
-#   push:
-#     branches: [ "main" ]
-#   pull_request:
-#     branches: [ "main" ]
-
-#   # Allows you to run this workflow manually from the Actions tab
-#   workflow_dispatch:
-# name: Scheduled Workflow
+name: "Auto Push to a Branch"
 
 on:
   schedule:
-    - cron: '* * * * *'  # Runs every minute
+    - cron: '* * * * *'  # Runs every 10 minutes
+
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  push_job:
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-    
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Make changes (e.g., update a file)
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          echo "Update at $(date)" >> update.log
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Automated update on $(date)" || echo "No changes to commit."
+
+      - name: Push changes to a different branch
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${PAT_TOKEN}@github.com/${{ github.repository }}.git
+          git push origin main
