@@ -1,4 +1,4 @@
-name: "Run Every 5 Minutes"  # Give your workflow a name
+name: "CI"  # Give your workflow a name
 
 on:
   schedule:
